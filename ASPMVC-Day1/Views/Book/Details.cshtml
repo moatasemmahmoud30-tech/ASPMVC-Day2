@@ -1,0 +1,30 @@
+﻿@model EF_day3.Entities.Book
+@{
+    ViewData["Title"] = "Book Details";
+}
+
+<div class="container mt-4 w-75 mx-auto">
+    <a href="/Book/Index" class="text-decoration-none text-secondary mb-3 d-inline-block">&larr; Back</a>
+    
+    <h2 class="fw-bold mb-0">Book Details</h2>
+    <p class="text-muted mb-4">Full information for this book.</p>
+
+    <div class="card shadow-sm border-0 rounded-4 p-4">
+        <div class="mb-3">
+            <small class="text-muted fw-bold d-block">TITLE</small>
+            <span class="fs-5">@Model.Title</span>
+        </div>
+        <div class="mb-3">
+            <small class="text-muted fw-bold d-block">AUTHOR</small>
+            <span class="fs-5">@Model.Author.Name</span>
+        </div>
+        <div class="mb-3">
+            <small class="text-muted fw-bold d-block">ISBN</small>
+            <span class="fs-5">@Model.ISBN</span>
+        </div>
+        <div class="mb-3">
+            <small class="text-muted fw-bold d-block">CATEGORY</small>
+            <span class="fs-5">@Model.Category.Name</span>
+        </div>
+    </div>
+</div>
