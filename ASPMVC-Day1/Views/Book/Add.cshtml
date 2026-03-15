@@ -1,6 +1,57 @@
-﻿namespace ASPMVC_Day1.Views.Book
-{
-    public class Add
-    {
-    }
+﻿@{
+    ViewData["Title"] = "Add New Book";
 }
+
+<div class="container w-50 bg-white p-5 rounded-4 shadow-sm mt-5">
+    <h2 class="fw-bold mb-1">Add New Book</h2>
+    <p class="text-muted mb-4">Fill in the details to add a new book.</p>
+
+    <form action="/Book/Add" method="post">
+        
+        <div class="mb-3">
+            <label class="form-label text-muted fw-bold small">TITLE</label>
+            <input type="text" name="Title" class="form-control bg-light border-0 py-2" placeholder="Enter book title" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-muted fw-bold small">AUTHOR</label>
+            <select name="AuthorId" class="form-select bg-light border-0 py-2" required>
+                <option value="">Select an Author</option>
+                @foreach (var author in ViewBag.Authors)
+                {
+                    <option value="@author.Id">@author.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-muted fw-bold small">ISBN</label>
+            <input type="text" name="ISBN" class="form-control bg-light border-0 py-2" placeholder="978-..." required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-muted fw-bold small">CATEGORY</label>
+            <select name="CategoryId" class="form-select bg-light border-0 py-2" required>
+                <option value="">Select a Category</option>
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <option value="@category.Id">@category.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label text-muted fw-bold small">PRICE</label>
+            <input type="number" step="0.01" name="Price" class="form-control bg-light border-0 py-2" placeholder="e.g. 15.99" required />
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label text-muted fw-bold small">PUBLISH YEAR</label>
+            <input type="number" name="PublishYear" class="form-control bg-light border-0 py-2" placeholder="e.g. 2024" required />
+        </div>
+
+
+
+        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold">Save Book</button>
+    </form>
+</div>

@@ -1,6 +1,64 @@
-﻿namespace ASPMVC_Day1.Views.Book
-{
-    public class Edit
-    {
-    }
+﻿@model EF_day3.Entities.Book
+@{
+    ViewData["Title"] = "Edit Book";
 }
+
+<div class="container w-50 bg-white p-5 rounded-4 shadow-sm mt-5">
+    <a href="/Book/Index" class="text-decoration-none text-secondary mb-3 d-inline-block">&larr; Back</a>
+    <h2 class="fw-bold mb-1">Edit Book</h2>
+    <p class="text-muted mb-4">Update the details for "@Model.Title".</p>
+
+    <form action="/Book/Edit" method="post">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        @if (Model.Version != null)
+        {
+            <input type="hidden" name="Version" value="@Convert.ToBase64String(Model.Version)" />
+        }
+
+        <div class="mb-3">
+            <label class="form-label text-muted fw-bold small">TITLE</label>
+            <input type="text" name="Title" value="@Model.Title" class="form-control bg-light border-0 py-2" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-muted fw-bold small">AUTHOR</label>
+            <select name="AuthorId" class="form-select bg-light border-0 py-2" required>
+                @foreach (var author in ViewBag.Authors)
+                {
+                    <option value="@author.Id" selected="@(author.Id == Model.AuthorId ? "selected" : null)">
+                        @author.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-muted fw-bold small">ISBN</label>
+            <input type="text" name="ISBN" value="@Model.ISBN" class="form-control bg-light border-0 py-2" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-muted fw-bold small">CATEGORY</label>
+            <select name="CategoryId" class="form-select bg-light border-0 py-2" required>
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <option value="@category.Id" selected="@(category.Id == Model.CategoryId ? "selected" : null)">
+                        @category.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label text-muted fw-bold small">PUBLISH YEAR</label>
+            <input type="number" name="PublishYear" value="@Model.PublishYear" class="form-control bg-light border-0 py-2" required />
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label text-muted fw-bold small">PRICE</label>
+            <input type="number" step="0.01" name="Price" value="@Model.Price" class="form-control bg-light border-0 py-2" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold">Update Book</button>
+    </form>
+</div>

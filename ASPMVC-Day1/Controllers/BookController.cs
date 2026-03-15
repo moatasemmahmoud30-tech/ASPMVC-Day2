@@ -24,10 +24,9 @@ namespace ASPMVC_Day1.Controllers
             return View(books);
         }
 
-        public IActionResult Details(string id)
+        public IActionResult Details(int id)
         {
-            var book = _context.Books.FirstOrDefault(b => b.ISBN == id);
-
+            var book = _context.Books.Find(id);
             if (book == null)
             {
                 return NotFound();
@@ -35,20 +34,87 @@ namespace ASPMVC_Day1.Controllers
 
             return View(book);
         }
-
+        [HttpGet]
         public IActionResult Add()
         {
+            ViewBag.Authors = _context.Authors.ToList();
+            ViewBag.Categories = _context.Categories.ToList();
             return View();
         }
-
-        public IActionResult Edit(string id)
+        [HttpPost]
+        public IActionResult Add(Book newBook)
         {
-            return View();
+            ModelState.Remove("Author");
+            ModelState.Remove("Category");
+            ModelState.Remove("Loans");
+            ModelState.Remove("Version");
+
+            if (newBook.Price == 0) newBook.Price = 19.99m;
+
+            if (ModelState.IsValid)
+            {
+                _context.Books.Add(newBook);
+                _context.SaveChanges(); 
+
+                return Redirect("/Book/Index"); 
+            }
+
+            ViewBag.Authors = _context.Authors.ToList();
+            ViewBag.Categories = _context.Categories.ToList();
+            return View(newBook);
         }
 
-        public IActionResult Delete(string id)
+        [HttpGet]
+        public IActionResult Edit(int id)
         {
-            return View();
+            var book = _context.Books.Find(id);
+            if (book == null) return NotFound();
+
+            ViewBag.Authors = _context.Authors.ToList();
+            ViewBag.Categories = _context.Categories.ToList();
+
+            return View(book);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(Book updatedBook)
+        {
+            ModelState.Remove("Author");
+            ModelState.Remove("Category");
+            ModelState.Remove("Loans");
+            ModelState.Remove("Version");
+
+            if (ModelState.IsValid)
+            {
+                _context.Books.Update(updatedBook);
+                _context.SaveChanges();
+                return Redirect("/Book/Index"); 
+            }
+
+            ViewBag.Authors = _context.Authors.ToList();
+            ViewBag.Categories = _context.Categories.ToList();
+            return View(updatedBook);
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            var book = _context.Books.Find(id);
+            if (book == null) return NotFound();
+
+            return View(book);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var book = _context.Books.Find(id);
+            if (book != null)
+            {
+                _context.Books.Remove(book);
+                _context.SaveChanges();
+            }
+            return Redirect("/Book/Index");
         }
     }
 }
