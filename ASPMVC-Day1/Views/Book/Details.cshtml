@@ -1,40 +1,54 @@
-﻿@model EF_day3.Entities.Book
+﻿@model ASPMVC_Day1.ViewModels.BookDetailsViewModel
 @{
     ViewData["Title"] = "Book Details";
 }
 
-<div class="container mt-4 w-75 mx-auto">
-    <a href="/Book/Index" class="text-decoration-none text-secondary mb-3 d-inline-block">&larr; Back</a>
+<div class="container w-50 bg-white p-5 rounded-4 shadow-sm mt-5">
     
-    <h2 class="fw-bold mb-0">Book Details</h2>
-    <p class="text-muted mb-4">Full information for this book.</p>
-
-    <div class="card shadow-sm border-0 rounded-4 p-4">
-        <div class="mb-3">
-            <small class="text-muted fw-bold d-block">TITLE</small>
-            <span class="fs-5">@Model.Title</span>
-        </div>
-        <div class="mb-3">
-            <small class="text-muted fw-bold d-block">AUTHOR</small>
-            <span class="fs-5">@Model.Author.Name</span>
-        </div>
-        <div class="mb-3">
-            <small class="text-muted fw-bold d-block">ISBN</small>
-            <span class="fs-5">@Model.ISBN</span>
-        </div>
-        <div class="mb-3">
-            <small class="text-muted fw-bold d-block">CATEGORY</small>
-            <span class="fs-5">@Model.Category.Name</span>
-        </div>
-
-        <div class="mb-3">
-            <div class="text-muted fw-bold d-block">PUBLISH YEAR</div>
-            <div class="fs-5">@Model.PublishYear</div>
-        </div>
-
-        <div class="mb-3">
-            <div class="text-muted fw-bold d-block">PRICE</div>
-            <div class="fs-5 fw-bold text-success">$@Model.Price</div>
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a asp-action="Index" class="text-decoration-none text-secondary">&larr; Back to Books</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3">Edit Book</a>
     </div>
+    
+    <h2 class="fw-bold text-primary mb-4">@Model.Title</h2>
+
+    <div class="row mb-3">
+        <div class="col-4 text-muted fw-bold small">AUTHOR</div>
+        <div class="col-8">@Model.AuthorName</div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-4 text-muted fw-bold small">ISBN</div>
+        <div class="col-8">@Model.ISBN</div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-4 text-muted fw-bold small">CATEGORY</div>
+        <div class="col-8">@Model.CategoryName</div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-4 text-muted fw-bold small">PUBLISH YEAR</div>
+        <div class="col-8">@Model.PublishYear</div>
+    </div>
+
+    <div class="row mb-4 bg-light p-3 rounded-3">
+        <div class="col-4 text-muted fw-bold small d-flex align-items-center">PRICE</div>
+        <div class="col-8 fs-5 fw-bold text-success">$@Model.Price</div>
+    </div>
+
+    @if (Model.AttachmentUrls.Any())
+    {
+        <hr class="my-4" />
+        <h5 class="fw-bold text-muted mb-3">Attachments</h5>
+        <div class="row g-2">
+            @foreach (var url in Model.AttachmentUrls)
+            {
+                <div class="col-md-4">
+                    <img src="@url" class="img-fluid rounded shadow-sm border" alt="Book Attachment" style="object-fit: cover; height: 150px; width: 100%;" />
+                </div>
+            }
+        </div>
+    }
+
 </div>

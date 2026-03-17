@@ -1,56 +1,60 @@
-﻿@{
+﻿@model ASPMVC_Day1.ViewModels.BookCreateViewModel
+@{
     ViewData["Title"] = "Add New Book";
 }
 
 <div class="container w-50 bg-white p-5 rounded-4 shadow-sm mt-5">
+    <a asp-action="Index" class="text-decoration-none text-secondary mb-3 d-inline-block">&larr; Back</a>
     <h2 class="fw-bold mb-1">Add New Book</h2>
-    <p class="text-muted mb-4">Fill in the details to add a new book.</p>
 
-    <form action="/Book/Add" method="post">
+    <div asp-validation-summary="All" class="text-danger fw-bold bg-light p-2 rounded mb-3"></div>
+
+    <form asp-controller="Book" asp-action="Add" method="post" enctype="multipart/form-data">
         
         <div class="mb-3">
-            <label class="form-label text-muted fw-bold small">TITLE</label>
-            <input type="text" name="Title" class="form-control bg-light border-0 py-2" placeholder="Enter book title" required />
+            <label asp-for="Title" class="form-label text-muted fw-bold small"></label>
+            <input asp-for="Title" class="form-control bg-light border-0 py-2" />
+            <span asp-validation-for="Title" class="text-danger small"></span>
         </div>
 
         <div class="mb-3">
-            <label class="form-label text-muted fw-bold small">AUTHOR</label>
-            <select name="AuthorId" class="form-select bg-light border-0 py-2" required>
-                <option value="">Select an Author</option>
-                @foreach (var author in ViewBag.Authors)
-                {
-                    <option value="@author.Id">@author.Name</option>
-                }
+            <label asp-for="AuthorId" class="form-label text-muted fw-bold small">AUTHOR</label>
+            <select asp-for="AuthorId" class="form-select bg-light border-0 py-2" asp-items="@(new SelectList(ViewBag.Authors, "Id", "Name"))">
+                <option value="">-- Select an Author --</option>
             </select>
+            <span asp-validation-for="AuthorId" class="text-danger small"></span>
         </div>
 
         <div class="mb-3">
-            <label class="form-label text-muted fw-bold small">ISBN</label>
-            <input type="text" name="ISBN" class="form-control bg-light border-0 py-2" placeholder="978-..." required />
+            <label asp-for="ISBN" class="form-label text-muted fw-bold small"></label>
+            <input asp-for="ISBN" class="form-control bg-light border-0 py-2" />
+            <span asp-validation-for="ISBN" class="text-danger small"></span>
         </div>
 
         <div class="mb-3">
-            <label class="form-label text-muted fw-bold small">CATEGORY</label>
-            <select name="CategoryId" class="form-select bg-light border-0 py-2" required>
-                <option value="">Select a Category</option>
-                @foreach (var category in ViewBag.Categories)
-                {
-                    <option value="@category.Id">@category.Name</option>
-                }
+            <label asp-for="CategoryId" class="form-label text-muted fw-bold small">CATEGORY</label>
+            <select asp-for="CategoryId" class="form-select bg-light border-0 py-2" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))">
+                <option value="">-- Select a Category --</option>
             </select>
+            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="PublishYear" class="form-label text-muted fw-bold small">PUBLISH YEAR</label>
+            <input asp-for="PublishYear" class="form-control bg-light border-0 py-2" />
+            <span asp-validation-for="PublishYear" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Price" class="form-label text-muted fw-bold small"></label>
+            <input asp-for="Price" class="form-control bg-light border-0 py-2" />
+            <span asp-validation-for="Price" class="text-danger small"></span>
         </div>
 
         <div class="mb-4">
-            <label class="form-label text-muted fw-bold small">PRICE</label>
-            <input type="number" step="0.01" name="Price" class="form-control bg-light border-0 py-2" placeholder="e.g. 15.99" required />
+            <label asp-for="Files" class="form-label text-muted fw-bold small">ATTACHMENTS</label>
+            <input asp-for="Files" type="file" multiple class="form-control bg-light border-0 py-2" />
         </div>
-
-        <div class="mb-4">
-            <label class="form-label text-muted fw-bold small">PUBLISH YEAR</label>
-            <input type="number" name="PublishYear" class="form-control bg-light border-0 py-2" placeholder="e.g. 2024" required />
-        </div>
-
-
 
         <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold">Save Book</button>
     </form>
