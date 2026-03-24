@@ -1,0 +1,27 @@
+﻿@model ASPMVC_Day1.ViewModels.BookCardViewModel
+
+<div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-lift">
+    @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+    {
+        <img src="@Model.CoverImageUrl" class="card-img-top" style="height: 250px; object-fit: cover;" alt="@Model.Title" />
+    }
+    else
+    {
+        <div class="card-img-top bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 250px;">
+            <i class="bi bi-book text-muted fs-1"></i>
+        </div>
+    }
+    
+    <div class="card-body d-flex flex-column p-3">
+        <h5 class="card-title fw-bold text-dark text-truncate mb-1" title="@Model.Title">@Model.Title</h5>
+        <p class="card-text text-muted small mb-3">@Model.AuthorName</p>
+        
+        <div class="mt-auto d-flex flex-column gap-2">
+            <span class="fs-6 fw-bold text-success text-center">@Model.Price.ToString("C")</span>
+    
+            <a asp-controller="Book" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary rounded-pill w-100 fw-bold">
+                View
+            </a>
+        </div>
+    </div>
+</div>

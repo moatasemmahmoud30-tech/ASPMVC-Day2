@@ -19,11 +19,25 @@ namespace ASPMVC_Day1.Controllers
             _env = env;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
-            ViewBag.Categories = new List<string> { "All columns", "Fiction", "Dystopian", "Science" };
+            ViewBag.Categories = _context.Categories.ToList();
 
-            var books = _context.Books.ToList();
+            var books = _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Attachments)
+                .Select(b => new BookCardViewModel
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    AuthorName = b.Author != null ? b.Author.Name : "Unknown Author",
+                    Price = b.Price,
+                    CoverImageUrl = b.Attachments.OrderBy(a => a.Id).FirstOrDefault() != null
+                                    ? b.Attachments.OrderBy(a => a.Id).FirstOrDefault().FilePath
+                                    : null
+                })
+                .ToList();
 
             return View(books);
         }
@@ -43,6 +57,8 @@ namespace ASPMVC_Day1.Controllers
             {
                 Id = book.Id,
                 Title = book.Title,
+                CategoryId = book.CategoryId,
+                AuthorId = book.AuthorId,
                 ISBN = book.ISBN,
                 PublishYear = book.PublishYear,
                 Price = book.Price,

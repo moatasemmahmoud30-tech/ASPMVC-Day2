@@ -10,7 +10,10 @@
 
         public string AuthorName { get; set; }
         public string CategoryName { get; set; }
+        public int CategoryId { get; set; }
+        public int AuthorId { get; set; }
 
+        public bool IsAvailable { get; set; } = true;
         public List<string> AttachmentUrls { get; set; } = new List<string>();
     }
 }
