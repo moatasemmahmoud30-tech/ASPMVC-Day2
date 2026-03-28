@@ -1,55 +1,70 @@
-﻿using ASPMVC_Day1.ViewModels;
-using EF_day3.Context;
+﻿using ASPMVC_Day1.Models;
+using ASPMVC_Day1.ViewModels;
 using EF_day3.Entities;
+using LibraryMS.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using System;
+using Microsoft.AspNetCore.Hosting;
 
 namespace ASPMVC_Day1.Controllers
 {
     public class BookController : Controller
     {
-        private readonly LibraryContext _context;
-        private readonly IWebHostEnvironment _env; 
+        private readonly IWebHostEnvironment _env;
+        private readonly IBookRepository _bookRepository;
 
-        public BookController(LibraryContext context, IWebHostEnvironment env)
+        private readonly IBaseRepository<Author> _authorRepository;
+        private readonly IBaseRepository<Category> _categoryRepository;
+        private readonly IBaseRepository<BookAttachment> _attachmentRepository;
+
+        public BookController(
+            IBookRepository bookRepository,
+            IBaseRepository<Author> authorRepository,
+            IBaseRepository<Category> categoryRepository,
+            IBaseRepository<BookAttachment> attachmentRepository,
+            IWebHostEnvironment env)
         {
-            _context = context;
+            _bookRepository = bookRepository;
+            _authorRepository = authorRepository;
+            _categoryRepository = categoryRepository;
+            _attachmentRepository = attachmentRepository;
             _env = env;
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string searchString, int? categoryId, decimal? maxPrice, int pageNumber = 1)
         {
-            ViewBag.Categories = _context.Categories.ToList();
+            int pageSize = 6;
 
-            var books = _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Attachments)
-                .Select(b => new BookCardViewModel
-                {
-                    Id = b.Id,
-                    Title = b.Title,
-                    AuthorName = b.Author != null ? b.Author.Name : "Unknown Author",
-                    Price = b.Price,
-                    CoverImageUrl = b.Attachments.OrderBy(a => a.Id).FirstOrDefault() != null
-                                    ? b.Attachments.OrderBy(a => a.Id).FirstOrDefault().FilePath
-                                    : null
-                })
-                .ToList();
+            var booksQuery = _bookRepository.GetFilteredAndPagedBooks(
+                searchString, categoryId, maxPrice, pageNumber, pageSize);
 
-            return View(books);
+            var booksList = booksQuery.Select(b => new BookCardViewModel
+            {
+                Id = b.Id,
+                Title = b.Title,
+                AuthorName = b.Author != null ? b.Author.Name : "Unknown",
+                Price = b.Price,
+                CoverImageUrl = b.Attachments.FirstOrDefault() != null ? b.Attachments.FirstOrDefault().FilePath : null
+            }).ToList();
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.SearchString = searchString;
+            ViewBag.CategoryId = categoryId;
+            ViewBag.MaxPrice = maxPrice;
+
+            ViewBag.Categories = _categoryRepository.GetAll().ToList();
+
+            return View(booksList);
         }
 
         [HttpGet]
         public IActionResult Details(int id)
         {
-            var book = _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Category)
-                .Include(b => b.Attachments)
-                .FirstOrDefault(b => b.Id == id);
+            var book = _bookRepository.GetBookWithDetails(id);
 
             if (book == null) return NotFound();
 
@@ -64,7 +79,7 @@ namespace ASPMVC_Day1.Controllers
                 Price = book.Price,
                 AuthorName = book.Author?.Name ?? "Unknown Author",
                 CategoryName = book.Category?.Name ?? "Uncategorized",
-                AttachmentUrls = book.Attachments.Select(a => a.FilePath).ToList()
+                AttachmentUrls = book.Attachments?.Select(a => a.FilePath).ToList() ?? new List<string>()
             };
 
             return View(model);
@@ -73,8 +88,8 @@ namespace ASPMVC_Day1.Controllers
         [HttpGet]
         public IActionResult Add()
         {
-            ViewBag.Authors = _context.Authors.ToList();
-            ViewBag.Categories = _context.Categories.ToList();
+            ViewBag.Authors = _authorRepository.GetAll().ToList();
+            ViewBag.Categories = _categoryRepository.GetAll().ToList();
             return View();
         }
 
@@ -83,7 +98,7 @@ namespace ASPMVC_Day1.Controllers
         {
             if (ModelState.IsValid)
             {
-                var newBook = new Book
+                var newBook = new EF_day3.Entities.Book
                 {
                     Title = model.Title,
                     AuthorId = model.AuthorId,
@@ -97,10 +112,7 @@ namespace ASPMVC_Day1.Controllers
                 if (model.Files != null && model.Files.Count > 0)
                 {
                     string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
-                    if (!Directory.Exists(uploadsFolder))
-                    {
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
+                    if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
 
                     foreach (var file in model.Files)
                     {
@@ -115,26 +127,24 @@ namespace ASPMVC_Day1.Controllers
                         newBook.Attachments.Add(new BookAttachment
                         {
                             FileName = file.FileName,
-                            FilePath = "/uploads/" + uniqueFileName 
+                            FilePath = "/uploads/" + uniqueFileName
                         });
                     }
                 }
 
-                _context.Books.Add(newBook);
-                _context.SaveChanges();
-
+                _bookRepository.Add(newBook);
                 return RedirectToAction("Index");
             }
 
-            ViewBag.Authors = _context.Authors.ToList();
-            ViewBag.Categories = _context.Categories.ToList();
+            ViewBag.Authors = _authorRepository.GetAll().ToList();
+            ViewBag.Categories = _categoryRepository.GetAll().ToList();
             return View(model);
         }
 
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            var book = _context.Books.Include(b => b.Attachments).FirstOrDefault(b => b.Id == id);
+            var book = _bookRepository.GetBookWithDetails(id);
             if (book == null) return NotFound();
 
             var model = new BookEditViewModel
@@ -147,11 +157,11 @@ namespace ASPMVC_Day1.Controllers
                 PublishYear = book.PublishYear,
                 Price = book.Price,
                 Version = book.Version,
-                ExistingAttachments = book.Attachments.ToList()
+                ExistingAttachments = book.Attachments?.ToList() ?? new List<BookAttachment>()
             };
 
-            ViewBag.Authors = _context.Authors.ToList();
-            ViewBag.Categories = _context.Categories.ToList();
+            ViewBag.Authors = _authorRepository.GetAll().ToList();
+            ViewBag.Categories = _categoryRepository.GetAll().ToList();
             return View(model);
         }
 
@@ -160,8 +170,7 @@ namespace ASPMVC_Day1.Controllers
         {
             if (ModelState.IsValid)
             {
-                var existingBook = _context.Books.Include(b => b.Attachments).FirstOrDefault(b => b.Id == model.Id);
-
+                var existingBook = _bookRepository.GetBookWithDetails(model.Id);
                 if (existingBook == null) return NotFound();
 
                 existingBook.Title = model.Title;
@@ -170,8 +179,7 @@ namespace ASPMVC_Day1.Controllers
                 existingBook.CategoryId = model.CategoryId;
                 existingBook.PublishYear = model.PublishYear;
                 existingBook.Price = model.Price;
-
-                _context.Entry(existingBook).OriginalValues["Version"] = model.Version;
+                existingBook.Version = model.Version; 
 
                 if (model.NewFiles != null && model.NewFiles.Count > 0)
                 {
@@ -195,19 +203,19 @@ namespace ASPMVC_Day1.Controllers
                     }
                 }
 
-                _context.SaveChanges();
+                _bookRepository.Update(existingBook);
                 return RedirectToAction("Index");
             }
 
-            ViewBag.Authors = _context.Authors.ToList();
-            ViewBag.Categories = _context.Categories.ToList();
+            ViewBag.Authors = _authorRepository.GetAll().ToList();
+            ViewBag.Categories = _categoryRepository.GetAll().ToList();
             return View(model);
         }
 
         [HttpPost]
         public IActionResult DeleteAttachment(int attachmentId, int bookId)
         {
-            var attachment = _context.Set<BookAttachment>().Find(attachmentId);
+            var attachment = _attachmentRepository.GetById(attachmentId);
 
             if (attachment != null)
             {
@@ -220,8 +228,7 @@ namespace ASPMVC_Day1.Controllers
                     System.IO.File.Delete(fullFilePath);
                 }
 
-                _context.Set<BookAttachment>().Remove(attachment);
-                _context.SaveChanges();
+                _attachmentRepository.Delete(attachment);
             }
 
             return RedirectToAction("Edit", new { id = bookId });
@@ -230,7 +237,7 @@ namespace ASPMVC_Day1.Controllers
         [HttpGet]
         public IActionResult Delete(int id)
         {
-            var book = _context.Books.Find(id);
+            var book = _bookRepository.GetBookWithDetails(id);
             if (book == null) return NotFound();
 
             return View(book);
@@ -239,24 +246,27 @@ namespace ASPMVC_Day1.Controllers
         [HttpPost, ActionName("Delete")]
         public IActionResult DeleteConfirmed(int id)
         {
-            var book = _context.Books.Include(b => b.Attachments).FirstOrDefault(b => b.Id == id);
+            var book = _bookRepository.GetBookWithDetails(id);
 
             if (book != null)
             {
                 string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
 
-                foreach (var attachment in book.Attachments)
+                if (book.Attachments != null)
                 {
-                    string fileName = attachment.FilePath.Replace("/uploads/", "");
-                    string fullFilePath = Path.Combine(uploadsFolder, fileName);
-
-                    if (System.IO.File.Exists(fullFilePath))
+                    foreach (var attachment in book.Attachments)
                     {
-                        System.IO.File.Delete(fullFilePath); 
+                        string fileName = attachment.FilePath.Replace("/uploads/", "");
+                        string fullFilePath = Path.Combine(uploadsFolder, fileName);
+
+                        if (System.IO.File.Exists(fullFilePath))
+                        {
+                            System.IO.File.Delete(fullFilePath);
+                        }
                     }
                 }
-                _context.Books.Remove(book);
-                _context.SaveChanges();
+
+                _bookRepository.Delete(book);
             }
             return RedirectToAction("Index");
         }

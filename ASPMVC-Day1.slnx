@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="../EF day3/EF day3/EF day3.csproj" />
   <Project Path="ASPMVC-Day1/ASPMVC-Day2.csproj" />
+  <Project Path="LibraryMS.Repositories/LibraryMS.Repositories.csproj" Id="d0c607f4-e306-4cf4-9e46-f17c8310c504" />
 </Solution>

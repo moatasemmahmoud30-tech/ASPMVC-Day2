@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using EF_day3.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -13,11 +18,30 @@
         <div class="container">
             <a class="navbar-brand fw-bold text-primary" href="/Home/Index">|||\ LibraryMS</a>
             <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto gap-3">
-                    <li class="nav-item"><a class="nav-link" href="/Home/Index">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Book/Index">Books</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Category/Index">Categories</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Author/Index">Authors</a></li>
+                <ul class="navbar-nav ms-auto gap-3 align-items-center">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Book" asp-action="Index">Books</a></li>
+    
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        var currentUser = await UserManager.GetUserAsync(User);
+        
+                        var displayName = currentUser?.FullName ?? User.Identity?.Name;
+
+                        <li class="nav-item d-flex align-items-center">
+                            <span class="nav-link text-primary fw-bold me-3">Hello, @displayName!</span>
+                        </li>
+                        <li class="nav-item">
+                            <form class="form-inline" asp-controller="Account" asp-action="Logout" method="post">
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">Logout</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Register">Register</a></li>
+                        <li class="nav-item"><a class="btn btn-primary btn-sm rounded-pill px-4" asp-controller="Account" asp-action="Login">Log in</a></li>
+                    }
                 </ul>
             </div>
         </div>
@@ -38,5 +62,6 @@
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
