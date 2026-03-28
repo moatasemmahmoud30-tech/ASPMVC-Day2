@@ -21,6 +21,28 @@
                 <ul class="navbar-nav ms-auto gap-3 align-items-center">
                     <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
                     <li class="nav-item"><a class="nav-link" asp-controller="Book" asp-action="Index">Books</a></li>
+
+                    @if (User.IsInRole("Librarian"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle fw-bold text-danger" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-shield-lock me-1"></i> Admin Panel
+                            </a>
+                            <ul class="dropdown-menu border-0 shadow-sm rounded-3 mt-2" aria-labelledby="adminDropdown">
+                                <li>
+                                    <a class="dropdown-item py-2" asp-controller="Book" asp-action="Add">
+                                        <i class="bi bi-book me-2 text-muted"></i> Add New Book
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item py-2" asp-controller="Role" asp-action="Index">
+                                        <i class="bi bi-people me-2 text-muted"></i> Manage Roles
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
     
                     @if (SignInManager.IsSignedIn(User))
                     {

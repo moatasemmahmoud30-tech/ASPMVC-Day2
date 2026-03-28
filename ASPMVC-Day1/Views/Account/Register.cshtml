@@ -40,6 +40,21 @@
                             <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                         </div>
 
+                        <div class="mb-4">
+                            <label asp-for="Role" class="form-label fw-semibold text-dark">Account Type</label>
+                            <select asp-for="Role" class="form-select rounded-pill px-4">
+                                <option value="">-- Select a Role --</option>
+                                @if (ViewBag.Roles != null)
+                                {
+                                    foreach (Microsoft.AspNetCore.Identity.IdentityRole role in ViewBag.Roles)
+                                    {
+                                        <option value="@role.Name">@role.Name</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger small"></span>
+                        </div>
+
                         <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm">
                             Register
                         </button>

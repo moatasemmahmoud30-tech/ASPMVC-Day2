@@ -1,0 +1,35 @@
+﻿@model string
+@{
+    ViewData["Title"] = "Add Role";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-5">
+            
+            <a asp-action="Index" class="text-decoration-none text-secondary mb-3 d-inline-block">&larr; Back to Roles</a>
+
+            <div class="card border-0 shadow-sm rounded-4 hover-lift">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-primary">Create Role</h2>
+                        <p class="text-muted">Define a new permission level for the system.</p>
+                    </div>
+
+                    <form asp-action="AddRole" method="post">
+                        <div asp-validation-summary="All" class="text-danger mb-3 small fw-bold"></div>
+
+                        <div class="mb-4">
+                            <label for="roleName" class="form-label fw-semibold text-dark">Role Name</label>
+                            <input type="text" id="roleName" name="roleName" value="@Model" class="form-control rounded-pill px-4" placeholder="e.g. Accountant, Manager..." required />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm">
+                            Save Role
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

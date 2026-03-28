@@ -7,10 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System;
+using Microsoft.AspNetCore.Authorization; 
 using Microsoft.AspNetCore.Hosting;
 
 namespace ASPMVC_Day1.Controllers
 {
+    [Authorize]
     public class BookController : Controller
     {
         private readonly IWebHostEnvironment _env;
@@ -85,6 +87,7 @@ namespace ASPMVC_Day1.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Librarian")]
         [HttpGet]
         public IActionResult Add()
         {
@@ -93,6 +96,7 @@ namespace ASPMVC_Day1.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Librarian")]
         [HttpPost]
         public IActionResult Add(BookCreateViewModel model)
         {
@@ -141,6 +145,7 @@ namespace ASPMVC_Day1.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Librarian")]
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -165,6 +170,7 @@ namespace ASPMVC_Day1.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Librarian")]
         [HttpPost]
         public IActionResult Edit(BookEditViewModel model)
         {
@@ -212,6 +218,7 @@ namespace ASPMVC_Day1.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Librarian")]
         [HttpPost]
         public IActionResult DeleteAttachment(int attachmentId, int bookId)
         {
@@ -234,6 +241,7 @@ namespace ASPMVC_Day1.Controllers
             return RedirectToAction("Edit", new { id = bookId });
         }
 
+        [Authorize(Roles = "Librarian")]
         [HttpGet]
         public IActionResult Delete(int id)
         {

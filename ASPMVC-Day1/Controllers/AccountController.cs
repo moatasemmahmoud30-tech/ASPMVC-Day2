@@ -1,5 +1,6 @@
 ﻿using ASPMVC_Day1.ViewModels;
 using EF_day3.Entities;
+using LibraryMS.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -10,16 +11,22 @@ namespace ASPMVC_Day1.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IRoleRepository _roleRepository;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountController(
+            UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IRoleRepository roleRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleRepository = roleRepository;
         }
 
         [HttpGet]
         public IActionResult Register()
         {
+            IEnumerable<IdentityRole> roles = _roleRepository.GetAllRoles();
+            ViewBag.Roles = roles;
+
             return View();
         }
 
@@ -28,27 +35,31 @@ namespace ASPMVC_Day1.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser
+                ApplicationUser user = new ApplicationUser
                 {
-                    UserName = model.Email, 
+                    UserName = model.Email,
                     Email = model.Email,
                     FullName = model.FullName
                 };
 
-                var result = await _userManager.CreateAsync(user, model.Password);
+                IdentityResult result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    await _userManager.AddToRoleAsync(user, model.Role);
 
+                    await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Book");
                 }
 
-                foreach (var error in result.Errors)
+                foreach (IdentityError error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+
+            IEnumerable<IdentityRole> roles = _roleRepository.GetAllRoles();
+            ViewBag.Roles = roles;
 
             return View(model);
         }
@@ -86,6 +97,12 @@ namespace ASPMVC_Day1.Controllers
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }
